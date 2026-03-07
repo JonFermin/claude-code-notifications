@@ -1,4 +1,4 @@
-# claude-code-notify
+# claude-code-notifications
 
 Native macOS notifications for [Claude Code](https://docs.anthropic.com/en/docs/claude-code). Get notified when Claude finishes a task or needs your input — click the notification to focus your terminal window.
 
@@ -20,8 +20,8 @@ Native macOS notifications for [Claude Code](https://docs.anthropic.com/en/docs/
 ## Install
 
 ```bash
-git clone https://github.com/honsfermin/claude-code-notify.git
-cd claude-code-notify
+git clone https://github.com/JonFermin/claude-code-notifications.git
+cd claude-code-notifications
 ./install.sh
 ```
 
@@ -30,7 +30,7 @@ The installer adds `Notification` and `Stop` hooks to your `~/.claude/settings.j
 ## Uninstall
 
 ```bash
-cd claude-code-notify
+cd claude-code-notifications
 ./uninstall.sh
 ```
 
@@ -57,7 +57,7 @@ If you prefer not to use the installer, add this to your `~/.claude/settings.jso
         "hooks": [
           {
             "type": "command",
-            "command": "/path/to/claude-code-notify/notify.sh notification"
+            "command": "/path/to/claude-code-notifications/notify.sh notification"
           }
         ]
       }
@@ -67,7 +67,7 @@ If you prefer not to use the installer, add this to your `~/.claude/settings.jso
         "hooks": [
           {
             "type": "command",
-            "command": "/path/to/claude-code-notify/notify.sh stop"
+            "command": "/path/to/claude-code-notifications/notify.sh stop"
           }
         ]
       }
