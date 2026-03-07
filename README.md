@@ -20,7 +20,7 @@ Native macOS notifications for [Claude Code](https://docs.anthropic.com/en/docs/
 ## Install
 
 ```bash
-git clone https://github.com/JonFermin/claude-code-notify.git
+git clone https://github.com/honsfermin/claude-code-notify.git
 cd claude-code-notify
 ./install.sh
 ```

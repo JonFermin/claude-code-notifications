@@ -39,7 +39,14 @@ fi
 # Detect terminal app for focus switching
 detect_terminal() {
   if [ -n "$TERM_PROGRAM" ]; then
-    echo "$TERM_PROGRAM"
+    case "$TERM_PROGRAM" in
+      vscode) echo "Code" ;;
+      cursor) echo "Cursor" ;;
+      Apple_Terminal) echo "Terminal" ;;
+      iTerm.app) echo "iTerm2" ;;
+      Hyper) echo "Hyper" ;;
+      *) echo "$TERM_PROGRAM" ;;
+    esac
   elif [ -n "$__CFBundleIdentifier" ]; then
     case "$__CFBundleIdentifier" in
       com.microsoft.VSCode) echo "Code" ;;
@@ -59,25 +66,33 @@ detect_terminal() {
 
 TERMINAL_APP=$(detect_terminal)
 
+# Sanitize values for shell quoting in -execute callback
+sanitize() { printf '%s' "$1" | sed "s/'/'\\\\''/g"; }
+SAFE_APP=$(sanitize "$TERMINAL_APP")
+SAFE_REPO=$(sanitize "$REPO")
+
 case "$1" in
   stop)
     "$NOTIFIER" -message "$REPO — $SUMMARY" -title "Claude Code ✅" -sound Glass \
-      -execute "$SCRIPT_DIR/notify.sh focus '$TERMINAL_APP' '$REPO'"
+      -execute "$SCRIPT_DIR/notify.sh focus '${SAFE_APP}' '${SAFE_REPO}'"
     ;;
   notification)
     "$NOTIFIER" -message "$QUESTION" -title "Claude Code 🙋" -subtitle "$REPO" -sound Ping \
-      -execute "$SCRIPT_DIR/notify.sh focus '$TERMINAL_APP' '$REPO'"
+      -execute "$SCRIPT_DIR/notify.sh focus '${SAFE_APP}' '${SAFE_REPO}'"
     ;;
   focus)
     APP="$2"
     WINDOW_MATCH="$3"
     if [ -n "$APP" ]; then
+      # Escape backslashes and double quotes for safe AppleScript interpolation
+      SAFE_AS_APP=$(printf '%s' "$APP" | sed 's/\\/\\\\/g; s/"/\\"/g')
+      SAFE_AS_MATCH=$(printf '%s' "$WINDOW_MATCH" | sed 's/\\/\\\\/g; s/"/\\"/g')
       osascript -e "
         tell application \"System Events\"
-          tell process \"$APP\"
+          tell process \"$SAFE_AS_APP\"
             set frontmost to true
             repeat with w in every window
-              if name of w contains \"$WINDOW_MATCH\" then
+              if name of w contains \"$SAFE_AS_MATCH\" then
                 perform action \"AXRaise\" of w
                 exit repeat
               end if
