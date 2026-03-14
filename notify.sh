@@ -16,14 +16,36 @@ fi
 # Extract repo name from cwd
 REPO=$(echo "$INPUT" | jq -r '(.cwd // "") | split("/") | last // "unknown"')
 
-# Get first sentence of last assistant message, truncated to 60 chars
-SUMMARY=$(echo "$INPUT" | jq -r '.last_assistant_message // ""' \
-  | tr '\n' ' ' \
-  | sed 's/  */ /g' \
-  | grep -oE '^[^.!?]+' \
-  | head -1 \
-  | cut -c1-60)
-SUMMARY="${SUMMARY:-Session}"
+# Build session stats from transcript
+TRANSCRIPT=$(echo "$INPUT" | jq -r '.transcript_path // ""')
+SUMMARY="Done"
+if [ -n "$TRANSCRIPT" ] && [ -f "$TRANSCRIPT" ]; then
+  EDITED=$(jq -c 'select(.type == "assistant") | .message.content[]? | select(.type == "tool_use") | .name' "$TRANSCRIPT" 2>/dev/null \
+    | grep -cE '"(Edit|Write|NotebookEdit)"' || true)
+  CMDS=$(jq -c 'select(.type == "assistant") | .message.content[]? | select(.type == "tool_use") | .name' "$TRANSCRIPT" 2>/dev/null \
+    | grep -c '"Bash"' || true)
+  FIRST_TS=$(jq -r 'select(.type == "user" or .type == "assistant") | .timestamp' "$TRANSCRIPT" 2>/dev/null | head -1)
+  LAST_TS=$(jq -r 'select(.type == "user" or .type == "assistant") | .timestamp' "$TRANSCRIPT" 2>/dev/null | tail -1)
+  if [ -n "$FIRST_TS" ] && [ -n "$LAST_TS" ]; then
+    START=$(date -j -f "%Y-%m-%dT%H:%M:%S" "${FIRST_TS%%.*}" "+%s" 2>/dev/null || echo "")
+    END=$(date -j -f "%Y-%m-%dT%H:%M:%S" "${LAST_TS%%.*}" "+%s" 2>/dev/null || echo "")
+    if [ -n "$START" ] && [ -n "$END" ]; then
+      SECS=$((END - START))
+      if [ "$SECS" -ge 3600 ]; then
+        DURATION="$((SECS / 3600))h$((SECS % 3600 / 60))m"
+      elif [ "$SECS" -ge 60 ]; then
+        DURATION="$((SECS / 60))m$((SECS % 60))s"
+      else
+        DURATION="${SECS}s"
+      fi
+    fi
+  fi
+  PARTS=""
+  [ "$EDITED" -gt 0 ] 2>/dev/null && PARTS="$EDITED edited"
+  [ "$CMDS" -gt 0 ] 2>/dev/null && PARTS="${PARTS:+$PARTS  }$CMDS cmds"
+  [ -n "$DURATION" ] && PARTS="${PARTS:+$PARTS  }$DURATION"
+  [ -n "$PARTS" ] && SUMMARY="Done. $PARTS"
+fi
 
 # Get notification message - use hook message first, fall back to last assistant message
 QUESTION=$(echo "$INPUT" | jq -r '.message // ""')
