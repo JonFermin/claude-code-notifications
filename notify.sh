@@ -44,30 +44,20 @@ fi
 
 # Detect terminal app for focus switching (returns name compatible with `open -a`)
 detect_terminal() {
-  if [ -n "$TERM_PROGRAM" ]; then
-    case "$TERM_PROGRAM" in
-      vscode) echo "Visual Studio Code" ;;
-      cursor) echo "Cursor" ;;
-      Apple_Terminal) echo "Terminal" ;;
-      iTerm.app) echo "iTerm" ;;
-      Hyper) echo "Hyper" ;;
-      *) echo "$TERM_PROGRAM" ;;
-    esac
-  elif [ -n "$__CFBundleIdentifier" ]; then
-    case "$__CFBundleIdentifier" in
-      com.microsoft.VSCode) echo "Visual Studio Code" ;;
-      com.todesktop.230313mzl4w4u92) echo "Cursor" ;;
-      dev.zed.Zed*) echo "Zed" ;;
-      com.apple.Terminal) echo "Terminal" ;;
-      com.googlecode.iterm2) echo "iTerm" ;;
-      io.alacritty) echo "Alacritty" ;;
-      com.mitchellh.ghostty) echo "Ghostty" ;;
-      net.kovidgoyal.kitty) echo "kitty" ;;
-      *) echo "" ;;
-    esac
-  else
-    echo ""
-  fi
+  local key="${TERM_PROGRAM:-$__CFBundleIdentifier}"
+  case "$key" in
+    vscode|com.microsoft.VSCode)       echo "Visual Studio Code" ;;
+    cursor|com.todesktop.230313mzl4w4u92) echo "Cursor" ;;
+    Apple_Terminal|com.apple.Terminal)  echo "Terminal" ;;
+    iTerm.app|com.googlecode.iterm2)   echo "iTerm" ;;
+    Hyper)                             echo "Hyper" ;;
+    dev.zed.Zed*)                      echo "Zed" ;;
+    io.alacritty)                      echo "Alacritty" ;;
+    com.mitchellh.ghostty)             echo "Ghostty" ;;
+    net.kovidgoyal.kitty)              echo "kitty" ;;
+    "")                                echo "" ;;
+    *)                                 echo "$key" ;;
+  esac
 }
 
 TERMINAL_APP=$(detect_terminal)
