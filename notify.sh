@@ -7,6 +7,12 @@ INPUT=$(cat)
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
+# Skip subagent events — only notify for main session
+AGENT_ID=$(echo "$INPUT" | jq -r '.agent_id // ""')
+if [ -n "$AGENT_ID" ]; then
+  exit 0
+fi
+
 # Extract repo name from cwd
 REPO=$(echo "$INPUT" | jq -r '(.cwd // "") | split("/") | last // "unknown"')
 
