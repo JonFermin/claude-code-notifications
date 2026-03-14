@@ -61,6 +61,7 @@ detect_terminal() {
 }
 
 TERMINAL_APP=$(detect_terminal)
+ICON="$SCRIPT_DIR/icon.png"
 
 # Sanitize terminal app name for shell quoting in -execute callback
 sanitize() { printf '%s' "$1" | sed "s/'/'\\\\''/g"; }
@@ -69,10 +70,12 @@ SAFE_APP=$(sanitize "$TERMINAL_APP")
 case "$1" in
   stop)
     "$NOTIFIER" -message "$REPO — $SUMMARY" -title "Claude Code ✅" -sound Glass \
+      -appIcon "$ICON" \
       -execute "$SCRIPT_DIR/notify.sh focus '${SAFE_APP}'"
     ;;
   notification)
     "$NOTIFIER" -message "$QUESTION" -title "Claude Code 🙋" -subtitle "$REPO" -sound Ping \
+      -appIcon "$ICON" \
       -execute "$SCRIPT_DIR/notify.sh focus '${SAFE_APP}'"
     ;;
   focus)

@@ -8,6 +8,8 @@ Native macOS notifications for [Claude Code](https://docs.anthropic.com/en/docs/
 - **Input notification** — alert when Claude asks a question or needs input
 - **Click to focus** — clicking a notification brings your terminal/editor to the front
 - **Auto-detects your terminal** — works with Cursor, VS Code, iTerm2, Terminal.app, Ghostty, Alacritty, Zed, kitty, and more
+- **Claude icon** — notifications display the Claude logo
+- **Subagent-aware** — only notifies for main session events, not subagent activity
 
 ## Requirements
 
@@ -27,6 +29,14 @@ cd claude-code-notifications
 
 The installer adds `Notification` and `Stop` hooks to your `~/.claude/settings.json`.
 
+### macOS Permissions
+
+For click-to-focus to work, `terminal-notifier` needs permission to open apps. If clicking notifications doesn't switch to your terminal:
+
+1. Open **System Settings** > **Privacy & Security** > **Accessibility**
+2. Click the **+** button and add `terminal-notifier` (usually at `/usr/local/bin/terminal-notifier`)
+3. Make sure it's checked/enabled
+
 ## Uninstall
 
 ```bash
@@ -43,7 +53,7 @@ Claude Code [hooks](https://docs.anthropic.com/en/docs/claude-code/hooks) are sh
 | `Stop` | Claude finished its task. You get a notification with the repo name and a summary of what it did. |
 | `Notification` | Claude needs input (e.g. asking a question, waiting for permission). You get the question text in the notification. |
 
-Clicking either notification runs an AppleScript to bring your terminal/editor window to the front and raise the matching project window.
+Clicking either notification brings your terminal/editor to the front.
 
 ## Manual setup
 
